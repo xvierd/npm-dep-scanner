@@ -22,6 +22,7 @@ program
   .option('--json', 'output as JSON instead of a table')
   .option('-m, --mismatches-only', 'only show dependencies with version differences')
   .option('-d, --diff', 'show git-diff-style version differences between projects')
+  .option('--depth <n>', 'max directory depth to scan (default: 10)', parseInt)
   .action(async (scanPath, opts) => {
     const rootDir = resolve(scanPath);
 
@@ -29,7 +30,7 @@ program
       console.log(chalk.bold(`\n\uD83D\uDCE6 npm-dep-scanner \u2014 Scanning: ${scanPath}\n`));
     }
 
-    const projects = await scanProjects(rootDir);
+    const projects = await scanProjects(rootDir, { maxDepth: opts.depth || 10 });
 
     if (projects.length === 0) {
       if (!opts.json) {

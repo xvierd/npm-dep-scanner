@@ -95,6 +95,7 @@ shared-utils  vs  web-app
 | `--dev` | | Include devDependencies too |
 | `--diff` | `-d` | Jump straight to the diff view |
 | `--mismatches-only` | `-m` | Hide dependencies that already match |
+| `--depth <n>` | | Max directory depth to scan (default: 10) |
 | `--json` | | Output as JSON (great for scripting) |
 | `--help` | `-h` | Show help |
 | `--version` | `-V` | Show version |
@@ -115,6 +116,9 @@ npm-dep-scanner --all --mismatches-only
 
 # Diff view including devDependencies
 npm-dep-scanner --all --dev --diff
+
+# Deep scan for nested projects
+npm-dep-scanner ~/big-project --depth 20
 
 # Pipe to jq for scripting
 npm-dep-scanner --all --json | jq '.mismatches'

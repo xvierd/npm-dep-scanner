@@ -8,7 +8,7 @@ const IGNORE_DIRS = ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build
  * Scan `rootDir` for package.json files up to `maxDepth` levels deep.
  * Returns an array of { name, relativePath, absolutePath, pkg }.
  */
-export async function scanProjects(rootDir, { maxDepth = 3 } = {}) {
+export async function scanProjects(rootDir, { maxDepth = 10 } = {}) {
   const pattern = '**/package.json';
   const matches = await fg(pattern, {
     cwd: rootDir,
