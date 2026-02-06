@@ -1,6 +1,6 @@
 {
   "name": "npm-dep-scanner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Scan a directory, detect Node.js projects, and compare dependency versions across them.",
   "type": "module",
   "bin": {
