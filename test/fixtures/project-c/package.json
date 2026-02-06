@@ -1,0 +1,12 @@
+{
+  "name": "shared-utils",
+  "version": "0.5.0",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "typescript": "^5.4.0"
+  }
+}
