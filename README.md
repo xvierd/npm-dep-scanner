@@ -133,11 +133,11 @@ $ npm-dep-scanner ~/projects
 
 📦 npm-dep-scanner — Scanning: ~/projects
 
-? Select projects to analyse ›
+? Select projects to analyse (type to search) ›
   ◯ api-service (./api-service)
   ◯ web-app (./web-app)
   ◯ shared-utils (./shared-utils)
-  ↑/↓ to navigate, Space to toggle, Enter to submit
+  ↑/↓ to navigate, type to filter, Space to toggle, Enter to submit
 
 Found 3 Node.js projects (3 selected):
   ✔ api-service (./api-service)

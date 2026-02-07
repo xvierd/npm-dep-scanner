@@ -10,15 +10,15 @@ export async function selectProjects(projects, { skipSelection = false } = {}) {
   if (projects.length === 1 || skipSelection) return projects;
 
   const { selected } = await prompts({
-    type: 'multiselect',
+    type: 'autocompleteMultiselect',
     name: 'selected',
-    message: 'Select projects to analyse',
+    message: 'Select projects to analyse (type to search)',
     choices: projects.map((p, i) => ({
       title: `${p.name} (${p.relativePath})`,
       value: i,
       selected: false,
     })),
-    hint: '- Space to toggle. Enter to submit',
+    hint: '- Type to filter, Space to toggle, Enter to submit',
   });
 
   // If the user cancels (Ctrl-C), selected will be undefined
