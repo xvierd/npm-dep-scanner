@@ -4,6 +4,8 @@
 
 `npm-dep-scanner` scans a directory full of Node.js projects, compares their dependency versions side by side, and highlights the mismatches so you can fix them before they cause problems.
 
+When a project has a lockfile (`package-lock.json`, `yarn.lock` or `pnpm-lock.yaml`), the **installed** version is used instead of the declared range — so you compare what is actually on disk. Ranges that differ as strings but are semver-compatible are shown in green, not flagged as problems.
+
 Perfect for monorepos, workspaces, or any folder with multiple Node.js projects.
 
 ---
@@ -93,12 +95,54 @@ shared-utils  vs  web-app
 |------|-------|--------------|
 | `--all` | `-a` | Skip project selection, scan everything |
 | `--dev` | | Include devDependencies too |
+| `--peer` | | Include peerDependencies |
+| `--optional` | | Include optionalDependencies |
+| `--all-deps` | | Include all dependency sets (prod, dev, peer, optional) |
+| `--declared` | | Use declared ranges even when a lockfile exists |
+| `--filter <pattern>` | | Only show packages matching a name or glob (e.g. `react-*`) |
+| `--html <file>` | | Also write a self-contained HTML report |
 | `--diff` | `-d` | Jump straight to the diff view |
 | `--mismatches-only` | `-m` | Hide dependencies that already match |
 | `--depth <n>` | | Max directory depth to scan (default: 10) |
+| `--no-progress` | | Disable the scan progress spinner |
 | `--json` | | Output as JSON (great for scripting) |
 | `--help` | `-h` | Show help |
 | `--version` | `-V` | Show version |
+
+---
+
+## Lockfiles
+
+For each project, the tool looks for a lockfile next to its `package.json` and
+prefers the **installed** version over the declared range:
+
+| Lockfile | Notes |
+|----------|-------|
+| `package-lock.json` | lockfileVersion 1, 2 and 3 |
+| `pnpm-lock.yaml` | v5/v6 (`packages`) and v9 (`importers`) |
+| `yarn.lock` | classic (v1) and berry (v2+) |
+
+Versions resolved from a lockfile are marked with `*` in the table and carry a
+`source` field in JSON output. When several lockfiles coexist in one directory,
+the precedence is `package-lock.json` → `pnpm-lock.yaml` → `yarn.lock`.
+Use `--declared` to compare declared ranges instead.
+
+## Version comparison
+
+Each dependency row is classified with real semver semantics:
+
+- **match** — identical versions everywhere
+- **compatible** *(green)* — different strings, but semver-compatible
+  (e.g. `^1.2.0` vs `~1.2.3`, or installed `1.6.8` vs declared `^1.6.0`)
+- **mismatch** *(yellow)* — genuinely incompatible versions
+
+Non-semver specs (`workspace:*`, `file:`, `latest`, git URLs) only match when identical.
+
+## Workspaces
+
+When the scanned directory is a workspace root (npm/yarn `workspaces` field or
+`pnpm-workspace.yaml`), member packages are tagged `[workspace]` and come
+pre-selected in the interactive picker.
 
 ---
 
@@ -116,6 +160,15 @@ npm-dep-scanner --all --mismatches-only
 
 # Diff view including devDependencies
 npm-dep-scanner --all --dev --diff
+
+# Compare every dependency set
+npm-dep-scanner --all --all-deps
+
+# Only react-related packages, plus an HTML report
+npm-dep-scanner --all --filter 'react-*' --html report.html
+
+# Compare declared ranges instead of installed versions
+npm-dep-scanner --all --declared
 
 # Deep scan for nested projects
 npm-dep-scanner ~/big-project --depth 20
@@ -155,6 +208,13 @@ Found 3 Node.js projects (3 selected):
 ## Requirements
 
 - Node.js 18 or higher
+
+## Development
+
+```bash
+npm install
+npm test    # node:test unit tests for lockfile parsers, semver comparison and analyzer
+```
 
 ## License
 

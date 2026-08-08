@@ -3,6 +3,9 @@
   "version": "1.0.3",
   "description": "Scan a directory, detect Node.js projects, and compare dependency versions across them.",
   "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "bin": {
     "npm-dep-scanner": "bin/cli.js"
   },
@@ -36,6 +39,12 @@
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
     "fast-glob": "^3.3.2",
-    "prompts": "^2.4.2"
+    "ora": "^9.4.1",
+    "prompts": "^2.4.2",
+    "semver": "^7.8.5",
+    "yaml": "^2.9.0"
+  },
+  "overrides": {
+    "picomatch": ">=2.3.2"
   }
 }

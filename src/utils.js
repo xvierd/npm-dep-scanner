@@ -25,3 +25,29 @@ export function projectName(pkg, pkgPath) {
   // parts ends with "package.json", so the directory is one before that
   return parts.length >= 2 ? parts[parts.length - 2] : basename(pkgPath);
 }
+
+/**
+ * Build a package-name predicate from a --filter pattern.
+ * Plain text matches as a case-insensitive substring; when the pattern
+ * contains glob characters (* or ?) it is treated as a glob.
+ * Returns null when no pattern was given.
+ */
+export function makeFilter(pattern) {
+  if (!pattern) return null;
+
+  if (!/[*?]/.test(pattern)) {
+    const needle = pattern.toLowerCase();
+    return (name) => name.toLowerCase().includes(needle);
+  }
+
+  const re = new RegExp(
+    '^' +
+      pattern
+        .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*/g, '.*')
+        .replace(/\?/g, '.') +
+      '$',
+    'i'
+  );
+  return (name) => re.test(name);
+}

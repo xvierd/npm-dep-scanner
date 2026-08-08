@@ -1,14 +1,19 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
+import { classifyRow } from './semver-utils.js';
 
 /**
  * Print a diff view of dependency version differences between projects.
  * Shows a table per project pair with only the packages that differ,
- * followed by a git-diff-style text summary.
+ * skipping rows whose ranges are semver-compatible.
  */
 export function printDiff(analysis) {
-  const matrices = [analysis.dependencies];
-  if (analysis.devDependencies) matrices.push(analysis.devDependencies);
+  const matrices = [
+    analysis.dependencies,
+    analysis.devDependencies,
+    analysis.peerDependencies,
+    analysis.optionalDependencies,
+  ].filter(Boolean);
 
   const projects = analysis.dependencies.projects;
 
@@ -27,11 +32,11 @@ export function printDiff(analysis) {
 
       for (const matrix of matrices) {
         for (const [pkg, versions] of matrix.rows) {
-          const verA = versions.get(a) ?? null;
-          const verB = versions.get(b) ?? null;
-          if (!verA || !verB) continue;   // skip if only one project has it
-          if (verA === verB) continue;    // skip if versions match
-          diffs.push({ pkg, verA, verB });
+          const cellA = versions.get(a) ?? null;
+          const cellB = versions.get(b) ?? null;
+          if (!cellA || !cellB) continue;   // skip if only one project has it
+          if (classifyRow([cellA.version, cellB.version]) !== 'mismatch') continue;
+          diffs.push({ pkg, cellA, cellB });
         }
       }
 
@@ -47,11 +52,11 @@ export function printDiff(analysis) {
         style: { head: [], border: [] },
       });
 
-      for (const { pkg, verA, verB } of diffs) {
+      for (const { pkg, cellA, cellB } of diffs) {
         table.push([
           chalk.yellow(pkg),
-          verA ? chalk.red(verA) : chalk.dim('—'),
-          verB ? chalk.green(verB) : chalk.dim('—'),
+          formatCell(cellA, chalk.red),
+          formatCell(cellB, chalk.green),
         ]);
       }
 
@@ -63,4 +68,10 @@ export function printDiff(analysis) {
   if (!hasDiffs) {
     console.log(chalk.green('No differences found between the selected projects.\n'));
   }
+}
+
+function formatCell(cell, colour) {
+  if (!cell) return chalk.dim('—');
+  const text = cell.version + (cell.source !== 'package.json' ? chalk.dim('*') : '');
+  return colour(text);
 }

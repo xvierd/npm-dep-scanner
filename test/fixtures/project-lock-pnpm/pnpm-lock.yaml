@@ -1,0 +1,30 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      axios:
+        specifier: ^1.6.0
+        version: 1.7.4
+      zod:
+        specifier: ^3.22.0
+        version: 3.23.8
+
+packages:
+
+  axios@1.7.4:
+    resolution: {integrity: sha512-abc==}
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-def==}
+
+snapshots:
+
+  axios@1.7.4: {}
+
+  zod@3.23.8: {}

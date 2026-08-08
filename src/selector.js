@@ -14,9 +14,9 @@ export async function selectProjects(projects, { skipSelection = false } = {}) {
     name: 'selected',
     message: 'Select projects to analyse (type to search)',
     choices: projects.map((p, i) => ({
-      title: `${p.name} (${p.relativePath})`,
+      title: `${p.name} (${p.relativePath})${p.isWorkspaceMember ? ' [workspace]' : ''}`,
       value: i,
-      selected: false,
+      selected: !!p.isWorkspaceMember,
     })),
     hint: '- Type to filter, Space to toggle, Enter to submit',
   });
