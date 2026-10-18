@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "npm-dep-scanner configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional editor schema reference. The scanner does not fetch this value."
+    },
+    "schemaVersion": { "const": 1, "default": 1 },
+    "exclude": {
+      "$ref": "#/$defs/patterns",
+      "description": "Directory exclusion globs relative to the configuration file's directory. !pattern reinclusion is unsupported; negative extglobs such as !(keep) are allowed."
+    },
+    "ignorePackages": {
+      "$ref": "#/$defs/patterns",
+      "description": "Package names or globs to omit from comparisons. !pattern reinclusion is unsupported; negative extglobs are allowed."
+    },
+    "comparison": {
+      "type": "string",
+      "enum": ["compatible", "exact"],
+      "default": "compatible"
+    },
+    "dependencyTypes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]
+      },
+      "default": ["dependencies"]
+    },
+    "versionSource": {
+      "type": "string",
+      "enum": ["resolved", "declared"],
+      "default": "resolved"
+    },
+    "maxDepth": { "type": "integer", "minimum": 0, "maximum": 100, "default": 10 }
+  },
+  "$defs": {
+    "patterns": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024,
+        "pattern": "^(?!(?:\\./)*!(?!\\())[^\\u0000-\\u001f]+$"
+      },
+      "default": [],
+      "description": "The scanner also validates balanced delimiters, a maximum nesting depth of 8 and a combined expansion budget of 4096 before matching."
+    }
+  }
+}

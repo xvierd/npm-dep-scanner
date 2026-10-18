@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "npm-dep-scanner report v1",
+  "description": "Portable dependency comparison report. Project IDs and paths are relative to the scan root. Summary package counts deduplicate names across the included sections after filtering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "status", "comparison", "projects", "dependencies", "devDependencies", "peerDependencies", "optionalDependencies", "mismatches", "compatible", "summary", "errors"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "status": { "enum": ["ok", "mismatch", "error"] },
+    "comparison": { "enum": ["compatible", "exact"] },
+    "projects": {
+      "type": "array",
+      "description": "Sorted by portable project ID; the root project uses '.'.",
+      "items": { "$ref": "#/$defs/project" }
+    },
+    "dependencies": { "$ref": "#/$defs/matrix" },
+    "devDependencies": { "$ref": "#/$defs/matrix" },
+    "peerDependencies": { "$ref": "#/$defs/matrix" },
+    "optionalDependencies": { "$ref": "#/$defs/matrix" },
+    "mismatches": { "$ref": "#/$defs/packageNames" },
+    "compatible": { "$ref": "#/$defs/packageNames" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "error" } } },
+      "then": {
+        "properties": {
+          "projects": { "maxItems": 0 },
+          "dependencies": { "type": "null" },
+          "devDependencies": { "type": "null" },
+          "peerDependencies": { "type": "null" },
+          "optionalDependencies": { "type": "null" },
+          "mismatches": { "maxItems": 0 },
+          "compatible": { "maxItems": 0 },
+          "summary": { "const": { "projects": 0, "packages": 0, "mismatches": 0, "compatible": 0 } },
+          "errors": { "minItems": 1 }
+        }
+      },
+      "else": { "properties": { "errors": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "ok" } } },
+      "then": { "properties": { "mismatches": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "mismatch" } } },
+      "then": { "properties": { "mismatches": { "minItems": 1 } } }
+    }
+  ],
+  "$defs": {
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)(?!\\.\\.(?:/|$)).+" },
+        "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)(?!\\.\\.(?:/|$)).+" },
+        "name": { "type": "string" }
+      }
+    },
+    "matrix": {
+      "description": "Null when a section is excluded. Otherwise maps package names to comparison rows, including an empty object for a selected section without dependencies.",
+      "type": ["object", "null"],
+      "additionalProperties": { "$ref": "#/$defs/row" }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "versions"],
+      "properties": {
+        "status": { "enum": ["match", "compatible", "mismatch"] },
+        "versions": {
+          "type": "object",
+          "description": "One key per portable project ID; null means that project does not declare this package in the section.",
+          "additionalProperties": { "$ref": "#/$defs/cell" }
+        }
+      }
+    },
+    "cell": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["version", "declared", "resolved", "source"],
+          "properties": {
+            "version": { "type": "string", "description": "Value used by the comparison policy." },
+            "declared": { "type": "string" },
+            "resolved": { "type": ["string", "null"] },
+            "source": { "enum": ["package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"] }
+          }
+        }
+      ]
+    },
+    "packageNames": {
+      "type": "array",
+      "description": "Unique package names in lexicographic order.",
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projects", "packages", "mismatches", "compatible"],
+      "properties": {
+        "projects": { "type": "integer", "minimum": 0 },
+        "packages": { "type": "integer", "minimum": 0 },
+        "mismatches": { "type": "integer", "minimum": 0 },
+        "compatible": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

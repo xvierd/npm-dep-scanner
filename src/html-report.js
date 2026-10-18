@@ -15,7 +15,7 @@ export async function writeHtmlReport(analysis, filePath, { scannedPath = '.' } 
 
   const sections = SECTIONS
     .filter(([key]) => analysis[key] && analysis[key].packages.length > 0)
-    .map(([key, title]) => renderSection(title, analysis[key]))
+    .map(([key, title]) => renderSection(title, analysis[key], analysis.comparison ?? 'compatible'))
     .join('\n');
 
   const html = `<!DOCTYPE html>
@@ -51,7 +51,7 @@ export async function writeHtmlReport(analysis, filePath, { scannedPath = '.' } 
 </head>
 <body>
 <h1>npm-dep-scanner report</h1>
-<p class="meta">Scanned: ${esc(scannedPath)} &middot; Generated: ${esc(generatedAt)}</p>
+<p class="meta">Scanned: ${esc(scannedPath)} &middot; Comparison: ${esc(analysis.comparison ?? 'compatible')} &middot; Generated: ${esc(generatedAt)}</p>
 ${renderSummary(analysis)}
 ${sections}
 </body>
@@ -78,8 +78,9 @@ function renderSummary(analysis) {
   return parts.join('\n');
 }
 
-function renderSection(title, matrix) {
-  const head = ['Package', ...matrix.projects].map((h) => `<th>${esc(h)}</th>`).join('');
+function renderSection(title, matrix, comparison) {
+  const head = ['Package', ...matrix.projects.map((p) => matrix.projectLabels.get(p))]
+    .map((h) => `<th>${esc(h)}</th>`).join('');
 
   const rows = matrix.packages
     .map((pkg) => {
@@ -112,7 +113,9 @@ function renderSection(title, matrix) {
 ${rows}
 </tbody>
 </table>
-<p class="legend">Yellow = version mismatch &middot; green = different but semver-compatible ranges &middot; lockfile source shown under each resolved version.</p>`;
+<p class="legend">${comparison === 'exact'
+    ? 'Yellow = different version strings'
+    : 'Yellow = version mismatch &middot; green = different ranges with a common version'} &middot; lockfile source shown under each resolved version.</p>`;
 }
 
 function esc(s) {
