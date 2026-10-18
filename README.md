@@ -16,10 +16,6 @@ Perfect for monorepos, workspaces, or any folder with multiple Node.js projects.
 - Context-aware npm, pnpm and Yarn lockfile resolution, including shared workspace locks.
 - Bounded pattern matching and removal of the vulnerable `braces` dependency chain.
 
-When upgrading, use **Node.js 22 or higher** and update scripts that consume the
-old JSON format: cells now live at `dependencies[name].versions[projectId]`.
-See [JSON report v1](#json-report-v1) for the complete contract.
-
 ---
 
 ## Get Started in 30 Seconds
@@ -285,11 +281,6 @@ unique package names across the visible sections. Error reports keep the same
 top-level shape with `status: "error"` and `errors: [{ "code", "message" }]`;
 diagnostic messages may include local paths. Stdout is JSON only; human-readable
 errors go to stderr.
-
-**Migration in 1.3.0:** this versioned contract replaces the previous unversioned JSON.
-Read a cell via `dependencies[name].versions[projectId]` instead of a project-name
-key directly on the row. Use `projects` to resolve display names. Duplicate names
-and names such as `status` no longer affect the data structure.
 
 ## Workspaces
 
